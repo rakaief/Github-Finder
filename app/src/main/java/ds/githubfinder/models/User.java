@@ -1,11 +1,11 @@
 package ds.githubfinder.models;
 
-public class GithubUser {
+public class User {
 
     private String username;
     private String imageUrl;
 
-    public GithubUser(String username, String imageUrl) {
+    public User(String username, String imageUrl) {
         this.username = username;
         this.imageUrl = imageUrl;
     }
