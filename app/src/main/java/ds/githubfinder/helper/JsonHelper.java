@@ -14,29 +14,28 @@ import ds.githubfinder.model.User;
 
 public class JsonHelper {
 
-    public static JSONArray stringToJsonArray(String string) throws JSONException {
-        if (TextUtils.isEmpty(string)) {
-            return null;
-        } else {
-            return new JSONArray(string);
-        }
-    }
-
     public static List<User> getUsersFromResponse(String response) {
-        try {
-            List<User> users= new ArrayList<>();
+        List<User> userList = new ArrayList<>();
 
-            JSONArray userJsonArray = stringToJsonArray(response);
+        if (TextUtils.isEmpty(response)) {
+            return userList;
+        }
+
+        try {
+            JSONObject userJsonObject = new JSONObject(response);
+
+            JSONArray userJsonArray = userJsonObject.getJSONArray(Constants.JSON_USER_LIST);
             for (int i=0; i<userJsonArray.length(); i++) {
-                JSONObject userJsonObject = userJsonArray.getJSONObject(i);
-                String username = userJsonObject.getString(Constants.JSON_USERNAME_FIELD);
-                String imageUrl = userJsonObject.getString(Constants.JSON_AVATAR_URL_FIELD);
-                users.add(new User(username, imageUrl));
+                JSONObject jsonObject = userJsonArray.getJSONObject(i);
+                String username = jsonObject.getString(Constants.JSON_USERNAME_FIELD);
+                String imageUrl = jsonObject.getString(Constants.JSON_AVATAR_URL_FIELD);
+
+                userList.add(new User(username, imageUrl));
             }
-            return users;
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
         }
+        return userList;
     }
 }

@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +19,10 @@ import ds.githubfinder.model.User;
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
 
     private List<User> userList = new ArrayList<>();
+
+    public UserAdapter() {
+
+    }
 
     public UserAdapter(List<User> userList) {
         this.userList = userList;
@@ -35,11 +41,15 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     @Override
     public int getItemCount() {
-        return userList.size();
+        if (userList == null) {
+            return 0;
+        } else {
+            return userList.size();
+        }
     }
 
-    public void addItems(List<User> dataList) {
-        this.userList.addAll(dataList);
+    public void setUserList(List<User> userList) {
+        this.userList = userList;
         notifyDataSetChanged();
     }
 
@@ -56,8 +66,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
         public void bind(User user) {
             username.setText(user.getUsername());
-
-            // TODO: set profile image;
+            Glide.with(itemView.getContext()).load(user.getImageUrl()).into(profileImage);
         }
     }
 }
