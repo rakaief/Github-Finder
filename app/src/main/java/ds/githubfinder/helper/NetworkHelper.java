@@ -9,83 +9,63 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 
+import ds.githubfinder.data.Constants;
+
 public class NetworkHelper {
 
-    public static URL createUrl(String stringUrl) {
-        URL url = null;
-        try {
-            url = new URL(stringUrl);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        return url;
+    public static URL createUrl(String stringUrl) throws MalformedURLException{
+        return new URL(stringUrl);
     }
 
-    private static HttpURLConnection createUrlConnection(URL url, String requestMethod) {
+    private static HttpURLConnection createUrlConnection(String stringUrl, String requestMethod)
+            throws IOException{
+
+        URL url = new URL(stringUrl);
+
         HttpURLConnection urlConnection = null;
-        try {
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setReadTimeout(Constants.NETWORK_READ_TIMEOUT);
-            urlConnection.setConnectTimeout(Constants.NETWORK_CONNECT_TIMEOUT);
-            urlConnection.setRequestMethod(requestMethod);
-            urlConnection.connect();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setReadTimeout(Constants.NETWORK_READ_TIMEOUT);
+        urlConnection.setConnectTimeout(Constants.NETWORK_CONNECT_TIMEOUT);
+        urlConnection.setRequestMethod(requestMethod);
+        urlConnection.connect();
+
         return urlConnection;
     }
 
-    public static String getResponse(URL url) {
-        String response = "";
-        if (url == null) {
-            return response;
-        }
-
-        HttpURLConnection urlConnection = createUrlConnection(url, "GET");
-        InputStream inputStream = null;
-        try {
-            if (urlConnection.getResponseCode() == 200) {
-                inputStream = urlConnection.getInputStream();
-                response = streamToString(inputStream);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (urlConnection != null) {
-            urlConnection.disconnect();
-        }
-
-        if (inputStream != null) {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return response;
-    }
-
-    private static String streamToString(InputStream inputStream) {
+    private static String streamToString(InputStream inputStream) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
 
         if (inputStream != null) {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charset.forName("UTF-8"));
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            try {
-                String line = bufferedReader.readLine();
-                while (line != null) {
-                    stringBuilder.append(line);
-                    line = bufferedReader.readLine();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            String line = bufferedReader.readLine();
+            while (line != null) {
+                stringBuilder.append(line);
+                line = bufferedReader.readLine();
             }
         }
 
         return stringBuilder.toString();
+    }
+
+    public static String getResponse(String stringUrl, String requestMethod) throws IOException {
+        String response = "";
+        HttpURLConnection urlConnection = createUrlConnection(stringUrl, requestMethod);
+        InputStream inputStream = null;
+
+        if (urlConnection.getResponseCode() == 200) {
+            inputStream = urlConnection.getInputStream();
+            response = streamToString(inputStream);
+        }
+
+        urlConnection.disconnect();
+
+        if (inputStream != null) {
+            inputStream.close();
+        }
+
+        return response;
     }
 
 }

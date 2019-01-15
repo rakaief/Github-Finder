@@ -1,4 +1,4 @@
-package ds.githubfinder.models;
+package ds.githubfinder.model;
 
 public class User {
 

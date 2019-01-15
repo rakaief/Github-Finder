@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ds.githubfinder.R;
-import ds.githubfinder.models.User;
+import ds.githubfinder.model.User;
 
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {

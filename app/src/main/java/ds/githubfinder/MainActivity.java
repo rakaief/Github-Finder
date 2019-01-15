@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ds.githubfinder.adapter.UserAdapter;
-import ds.githubfinder.models.User;
+import ds.githubfinder.model.User;
 
 public class MainActivity extends AppCompatActivity {
 
