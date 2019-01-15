@@ -22,7 +22,6 @@ public class JsonHelper {
         }
     }
 
-
     public static List<User> getUsersFromResponse(String response) {
         try {
             List<User> users= new ArrayList<>();

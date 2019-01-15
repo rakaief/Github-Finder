@@ -7,11 +7,26 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <LinearLayout
+        android:background="@color/colorPrimary"
+        android:layout_width="match_parent"
+        android:padding="8dp"
+        android:layout_height="?android:attr/actionBarSize"
+        android:elevation="4dp">
+
+        <android.support.v7.widget.SearchView
+            android:id="@+id/main_search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/background"
+            app:defaultQueryHint="@string/search_hint"/>
+
+    </LinearLayout>
+
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/user_recycler_view"
+        android:id="@+id/main_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
-
 
 </LinearLayout>
