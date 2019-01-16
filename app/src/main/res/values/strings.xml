@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">Github Finder</string>
     <string name="search_hint">Search Github users</string>
+    <string name="rate_limit_message">Wait a minutes, API rate limit achieved</string>
+    <string name="unknown_error_message">Unknown error occured</string>
 </resources>

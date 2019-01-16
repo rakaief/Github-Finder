@@ -13,10 +13,13 @@ import ds.githubfinder.data.Constants;
 
 public class NetworkHelper {
 
-    public static URL createUrl(String stringUrl) throws MalformedURLException{
-        return new URL(stringUrl);
-    }
-
+    /**
+     * Setup new HTTP Connection from stringUrl with requestMethod
+     * @param stringUrl
+     * @param requestMethod
+     * @return
+     * @throws IOException
+     */
     private static HttpURLConnection createUrlConnection(String stringUrl, String requestMethod)
             throws IOException{
 
@@ -32,6 +35,12 @@ public class NetworkHelper {
         return urlConnection;
     }
 
+    /**
+     * Convert inputStream to string
+     * @param inputStream
+     * @return
+     * @throws IOException
+     */
     private static String streamToString(InputStream inputStream) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -49,6 +58,13 @@ public class NetworkHelper {
         return stringBuilder.toString();
     }
 
+    /**
+     * Get response from http connection.
+     * @param stringUrl
+     * @param requestMethod
+     * @return
+     * @throws IOException
+     */
     public static String getResponse(String stringUrl, String requestMethod) throws IOException {
         String response = "";
         HttpURLConnection urlConnection = createUrlConnection(stringUrl, requestMethod);
@@ -57,6 +73,9 @@ public class NetworkHelper {
         if (urlConnection.getResponseCode() == 200) {
             inputStream = urlConnection.getInputStream();
             response = streamToString(inputStream);
+        } else if (urlConnection.getResponseCode() == 403) {
+            return urlConnection.getResponseMessage();
+
         }
 
         urlConnection.disconnect();

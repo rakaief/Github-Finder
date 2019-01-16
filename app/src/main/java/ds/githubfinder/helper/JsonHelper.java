@@ -14,10 +14,34 @@ import ds.githubfinder.model.User;
 
 public class JsonHelper {
 
+    /**
+     * Return the number of user in response.
+     * @param response
+     * @return
+     */
+    public static int getUsersCountFromResponse(String response) {
+        if (TextUtils.isEmpty(response)) {
+            return 0;
+        } else {
+            try {
+                JSONObject userJsonObject = new JSONObject(response);
+                return userJsonObject.getInt(Constants.JSON_TOTAL_COUNT);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return 0;
+            }
+        }
+    }
+
+    /**
+     * Parse response and get list of all users on it.
+     * @param response
+     * @return
+     */
     public static List<User> getUsersFromResponse(String response) {
         List<User> userList = new ArrayList<>();
 
-        if (TextUtils.isEmpty(response)) {
+        if (TextUtils.isEmpty(response) || response.equals(Constants.API_SEARCH_FORBIDDEN)) {
             return userList;
         }
 

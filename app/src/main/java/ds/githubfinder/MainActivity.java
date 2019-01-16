@@ -11,6 +11,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,52 +26,61 @@ import ds.githubfinder.model.User;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Toolbar toolbar;
-    private SearchView searchView;
-    private List<User> userList = new ArrayList<>();
-    private RecyclerView userRecyclerView;
-    private UserAdapter userAdapter;
-    private SearchTask searchTask;
-    private String searchQuery;
+    private Toolbar mainToolbar;
+    private SearchView mainSearch;
+    private RecyclerView mainRecyclerView;
+    private ProgressBar mainProgress;
 
+    private SearchTask searchTask;
+
+    private String searchQuery = "";
+    private List<User> userList = new ArrayList<>();
+    private UserAdapter userAdapter = new UserAdapter(userList);
     private static boolean isLoading = false;
     private static boolean isLastPage =false;
     private static int currentPage = 1;
+    private static int totalPage = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setToolbar();
+        bindView();
+        setSupportActionBar(mainToolbar);
         setSearchView();
         setRecyclerView();
     }
 
-    private void setToolbar() {
-        toolbar = findViewById(R.id.main_toolbar);
-        setSupportActionBar(toolbar);
-        setSearchView();
+    /**
+     * Bind xml component through it's id;
+     */
+    private void bindView() {
+        mainToolbar = findViewById(R.id.main_toolbar);
+        mainSearch = findViewById(R.id.main_search);
+        mainRecyclerView = findViewById(R.id.main_recycler_view);
+        mainProgress = findViewById(R.id.main_progress);
     }
 
+    /**
+     * Setup mainRecyclerView layout manager, adapter, and scroll listener.
+     */
     private void setRecyclerView() {
-        userRecyclerView = findViewById(R.id.main_recycler_view);
-
-        userAdapter = new UserAdapter(userList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         EndlessScrollListener endlessScrollListener = new EndlessScrollListener(layoutManager);
-        userRecyclerView.setLayoutManager(layoutManager);
-        userRecyclerView.addOnScrollListener(endlessScrollListener);
-        userRecyclerView.setAdapter(userAdapter);
+        mainRecyclerView.setLayoutManager(layoutManager);
+        mainRecyclerView.addOnScrollListener(endlessScrollListener);
+        mainRecyclerView.setAdapter(userAdapter);
     }
 
+    /**
+     * Setup mainSearch and it's query text listener.
+     */
     private void setSearchView() {
-        searchView = findViewById(R.id.main_search);
-
-        ImageView closeButton = (ImageView) searchView.findViewById(android.support.v7.appcompat.R.id.search_close_btn);
+        ImageView closeButton = (ImageView) mainSearch.findViewById(android.support.v7.appcompat.R.id.search_close_btn);
         closeButton.setVisibility(View.GONE);
 
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        mainSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 if (searchTask != null) {
@@ -84,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onQueryTextChange(String newText) {
                 if (TextUtils.isEmpty(newText)) {
                     userList = new ArrayList<>();
+                    currentPage = 1;
                     userAdapter.setUserList(userList);
                 }
                 return true;
@@ -91,38 +103,64 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    class SearchTask extends AsyncTask<String, Void, Void> {
-
+    /**
+     * Asynctask to retrieve Github Search API.
+     */
+    class SearchTask extends AsyncTask<String, Void, Integer> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            isLoading = true;
+            mainProgress.setVisibility(View.VISIBLE);
         }
 
         @Override
-        protected Void doInBackground(String... strings) {
+        protected Integer doInBackground(String... strings) {
             try {
-                String response = NetworkHelper.getResponse(Constants.NETWORK_BASE_URL + strings[0], "GET");
-                List<User> newUserList = JsonHelper.getUsersFromResponse(response);
+                String stringUrl = Constants.API_SEARCH_BASE_URL + strings[0] + "&page=" + String.valueOf(currentPage);
+                String response = NetworkHelper.getResponse(stringUrl, Constants.API_SEARCH_HTTP_METHOD);
 
-                if (strings[1].equals(Constants.SEARCH_NEW_USERS)) {
-                    userList = newUserList;
+                if (response.equals(Constants.API_SEARCH_FORBIDDEN)) {
+                    return Constants.API_SEARCH_RATE_LIMIT;
                 } else {
-                    userList.addAll(newUserList);
+                    List<User> newUserList = JsonHelper.getUsersFromResponse(response);
+                    if (strings[1].equals(Constants.SEARCH_NEW_USERS)) {
+                        userList = newUserList;
+
+                        int maxTotalPage = (int) Math.ceil(1.0 * JsonHelper.getUsersCountFromResponse(response) / Constants.API_PAGINATION_SIZE);
+                        int maxPage = (int) Math.ceil(1.0 * Constants.API_MAX_SEARCH / Constants.API_PAGINATION_SIZE);
+
+                        totalPage = Math.min(maxTotalPage, maxPage);
+                    } else {
+                        userList.addAll(newUserList);
+                    }
+                    return Constants.API_SEARCH_SUCCESS;
                 }
-                isLoading = false;
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return null;
+            return Constants.API_SEARCH_ERROR;
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            userAdapter.setUserList(userList);
+        protected void onPostExecute(Integer integer) {
+            super.onPostExecute(integer);
+            if (integer.equals(Constants.API_SEARCH_RATE_LIMIT)) {
+                Toast.makeText(MainActivity.this, getString(R.string.rate_limit_message), Toast.LENGTH_SHORT).show();
+
+            } else if (integer.equals(Constants.API_SEARCH_ERROR)) {
+                Toast.makeText(MainActivity.this, getString(R.string.unknown_error_message), Toast.LENGTH_SHORT).show();
+            } else {
+                userAdapter.setUserList(userList);
+            }
+            isLoading = false;
+            mainProgress.setVisibility(View.GONE);
         }
     }
 
+    /**
+     * Scroll listener on mainRecyclerView to handle Github Search API pagination
+     */
     class EndlessScrollListener extends RecyclerView.OnScrollListener {
 
         LinearLayoutManager layoutManager;
@@ -142,14 +180,20 @@ public class MainActivity extends AppCompatActivity {
             if (!isLoading() && !isLastPage()) {
                 if ((visibleCount + firstVisiblePosition) >= totalCount && firstVisiblePosition >= 0) {
                     loadMore();
-                    System.out.println("load more");
                 }
             }
         }
 
+        /**
+         * Load next pagination of users.
+         */
         private void loadMore() {
-            MainActivity.isLoading = true;
             currentPage++;
+
+            if (currentPage >= totalPage) {
+                isLastPage = true;
+            }
+
             if (searchQuery != null) {
                 if (searchTask != null) {
                     searchTask.cancel(true);
@@ -159,10 +203,18 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        /**
+         * Check is currentPage has achieved the last page.
+         * @return
+         */
         private boolean isLastPage() {
             return MainActivity.isLastPage;
         }
 
+        /**
+         * Check if current searchTask is on working.
+         * @return
+         */
         private boolean isLoading() {
             return MainActivity.isLoading;
         }
