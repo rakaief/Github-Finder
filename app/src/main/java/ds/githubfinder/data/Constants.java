@@ -9,4 +9,9 @@ public class Constants {
     public static final String JSON_USERNAME_FIELD = "login";
     public static final String JSON_AVATAR_URL_FIELD = "avatar_url";
     public static final String JSON_USER_LIST = "items";
+
+
+    public static final int RECYCLER_VIEW_PAGE_SIZE = 10;
+    public static final String SEARCH_NEW_USERS = "new";
+    public static final String SEARCH_ADD_USERS = "add";
 }

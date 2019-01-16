@@ -4,4 +4,5 @@
     <color name="colorPrimaryDark">#0097A7</color>
     <color name="colorAccent">#D81B60</color>
     <color name="background">#FBFBFB</color>
+    <color name="shimmer">#DDDDDD</color>
 </resources>
