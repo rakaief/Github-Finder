@@ -21,5 +21,8 @@ public class Constants {
 
     public static final String SEARCH_NEW_USERS = "new";
     public static final String SEARCH_ADD_USERS = "add";
+
+    public static final String CLIENT_ID = "245bcd04581513f36a64" ;
+    public static final String CLIENT_SECRET = "8471c1b4bad816c5806c2412f9b4b8323b51193e";
 }
 

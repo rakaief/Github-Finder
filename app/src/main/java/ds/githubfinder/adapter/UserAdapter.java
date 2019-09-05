@@ -71,7 +71,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
         private TextView username;
         private ImageView profileImage;
-        private ShimmerFrameLayout userShimmer;
         private LinearLayout userContainer;
 
         UserViewHolder(View itemView) {
@@ -79,7 +78,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             username = itemView.findViewById(R.id.user_username);
             profileImage = itemView.findViewById(R.id.user_profile_image);
             userContainer = itemView.findViewById(R.id.user_container);
-            userShimmer = itemView.findViewById(R.id.user_shimmer);
         }
 
         private void bind(User user) {
@@ -87,21 +85,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
             Glide.with(itemView.getContext())
                     .load(user.getImageUrl())
-                    .listener(new RequestListener<Drawable>() {
-
-                        @Override
-                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            System.out.println("onload failed");
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            userShimmer.setVisibility(View.GONE);
-                            userContainer.setVisibility(View.VISIBLE);
-                            return false;
-                        }
-                    })
                     .into(profileImage);
         }
     }

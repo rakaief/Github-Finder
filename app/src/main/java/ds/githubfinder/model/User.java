@@ -1,9 +1,11 @@
 package ds.githubfinder.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class User {
 
-    private String username;
-    private String imageUrl;
+    @SerializedName("login") private String username;
+    @SerializedName("avatar_url") private String imageUrl;
 
     public User(String username, String imageUrl) {
         this.username = username;
